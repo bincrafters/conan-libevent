@@ -47,7 +47,7 @@ class LibeventConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires.add("OpenSSL/1.0.2o@conan/stable")
+            self.requires.add("OpenSSL/latest_1.0.2x@conan/stable")
 
     def source(self):
         tools.get("{0}/releases/download/release-{1}-stable/libevent-{1}-stable.tar.gz".format(self.homepage, self.version))
