@@ -50,7 +50,7 @@ class LibeventConan(ConanFile):
             self.requires.add("OpenSSL/latest_1.0.2x@conan/stable")
 
     def source(self):
-        tools.get("{0}/releases/download/release-{1}-stable/libevent-{1}-stable.tar.gz".format(self.homepage, self.version))
+        tools.get("{0}/releases/download/release-{1}-beta/libevent-{1}-beta.tar.gz".format(self.homepage, self.version))
         os.rename("libevent-{0}-stable".format(self.version), self.source_subfolder)
         shutil.copy("print-winsock-errors.c", os.path.join(self.source_subfolder, "test"))
 
