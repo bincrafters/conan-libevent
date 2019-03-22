@@ -8,7 +8,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class LibeventConan(ConanFile):
     name = "libevent"
-    version = "2.1.8"
+    version = "2.1.9-beta"
     description = 'libevent - an event notification library'
     url = "https://github.com/bincrafters/conan-libevent"
     homepage = "https://github.com/libevent/libevent"
