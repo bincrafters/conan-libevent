@@ -4,19 +4,20 @@
 import os
 import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, RunEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+
 
 class LibeventConan(ConanFile):
     name = "libevent"
     version = "2.1.8"
-    description = 'libevent - an event notification library'
+    description = "libevent - an event notification library"
+    topics = ("conan", "libevent", "event")
     url = "https://github.com/bincrafters/conan-libevent"
     homepage = "https://github.com/libevent/libevent"
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSD-3-Clause"
     exports = ["LICENSE.md"]
     exports_sources = ["print-winsock-errors.c"]
-    source_subfolder = "source_subfolder"
+    _source_subfolder = "source_subfolder"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
                "fPIC": [True, False],
@@ -50,9 +51,10 @@ class LibeventConan(ConanFile):
             self.requires.add("OpenSSL/latest_1.0.2x@conan/stable")
 
     def source(self):
-        tools.get("{0}/releases/download/release-{1}-stable/libevent-{1}-stable.tar.gz".format(self.homepage, self.version))
-        os.rename("libevent-{0}-stable".format(self.version), self.source_subfolder)
-        shutil.copy("print-winsock-errors.c", os.path.join(self.source_subfolder, "test"))
+        checksum = "965cc5a8bb46ce4199a47e9b2c9e1cae3b137e8356ffdad6d94d3b9069b71dc2"
+        tools.get("{0}/releases/download/release-{1}-stable/libevent-{1}-stable.tar.gz".format(self.homepage, self.version), sha256=checksum)
+        os.rename("libevent-{0}-stable".format(self.version), self._source_subfolder)
+        shutil.copy("print-winsock-errors.c", os.path.join(self._source_subfolder, "test"))
 
     def imports(self):
         # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
@@ -64,7 +66,7 @@ class LibeventConan(ConanFile):
         # 2. copying dylib's to the build directory (fortunately works on OS X)
 
         if self.settings.os == "Macos":
-            self.copy("*.dylib*", dst=self.source_subfolder, keep_path=False)
+            self.copy("*.dylib*", dst=self._source_subfolder, keep_path=False)
 
     def build(self):
 
@@ -78,7 +80,7 @@ class LibeventConan(ConanFile):
                 env_vars['OPENSSL_LIBADD'] = '-ldl'
 
             # disable rpath build
-            tools.replace_in_file(os.path.join(self.source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
 
             # compose configure options
             configure_args = []
@@ -90,7 +92,7 @@ class LibeventConan(ConanFile):
 
             with tools.environment_append(env_vars):
 
-                with tools.chdir(self.source_subfolder):
+                with tools.chdir(self._source_subfolder):
                     # set LD_LIBRARY_PATH
                     with tools.environment_append(RunEnvironment(self).vars):
                         autotools.configure(args=configure_args)
@@ -102,25 +104,25 @@ class LibeventConan(ConanFile):
             if self.options.with_openssl:
                 suffix = "OPENSSL_DIR=" + self.deps_cpp_info['OpenSSL'].rootpath
             # add runtime directives to runtime-unaware nmakefile
-            tools.replace_in_file(os.path.join(self.source_subfolder, "Makefile.nmake"),
+            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.nmake"),
                                   'LIBFLAGS=/nologo',
                                   'LIBFLAGS=/nologo\n'
                                   'CFLAGS=$(CFLAGS) /%s' % str(self.settings.compiler.runtime))
             # do not build tests. static_libs is the only target, no shared libs at all
             make_command = "nmake %s -f Makefile.nmake static_libs" % suffix
-            with tools.chdir(self.source_subfolder):
+            with tools.chdir(self._source_subfolder):
                 self.run("%s && %s" % (vcvars, make_command))
 
 
     def package(self):
-        self.copy("LICENSE", src=self.source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
-        self.copy("*.h", dst="include", src=os.path.join(self.source_subfolder, "include"))
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
+        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
         if self.settings.os == "Windows":
-            self.copy("event-config.h", src=os.path.join(self.source_subfolder, "WIN32-Code", "nmake", "event2"), dst="include/event2")
-            self.copy("tree.h", src=os.path.join(self.source_subfolder, "WIN32-Code"), dst="include")
+            self.copy("event-config.h", src=os.path.join(self._source_subfolder, "WIN32-Code", "nmake", "event2"), dst="include/event2")
+            self.copy("tree.h", src=os.path.join(self._source_subfolder, "WIN32-Code"), dst="include")
             self.copy(pattern="*.lib", dst="lib", keep_path=False)
         for header in ['evdns', 'event', 'evhttp', 'evrpc', 'evutil']:
-            self.copy(header+'.h', dst="include", src=self.source_subfolder)
+            self.copy(header+'.h', dst="include", src=self._source_subfolder)
         if self._is_shared:
             if self.settings.os == "Macos":
                 self.copy(pattern="*.dylib", dst="lib", keep_path=False)
