@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-import shutil
-from conans import ConanFile, AutoToolsBuildEnvironment, RunEnvironment, tools
+from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
 
@@ -17,8 +16,7 @@ class LibeventConan(ConanFile):
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSD-3-Clause"
     exports = ["LICENSE.md"]
-    exports_sources = ["print-winsock-errors.c"]
-    _source_subfolder = "source_subfolder"
+    exports_sources = ["CMakeLists.txt"]
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
                "fPIC": [True, False],
@@ -28,17 +26,18 @@ class LibeventConan(ConanFile):
                        "fPIC": True,
                        "with_openssl": True,
                        "disable_threads": False}
+    generators = "cmake"
+    _source_subfolder = "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        del self.settings.compiler.libcxx
         if self.settings.os == "Windows" and \
            self.options.shared:
             raise ConanInvalidConfiguration("libevent does not support shared on Windows")
-
-        del self.settings.compiler.libcxx
         if self.options.with_openssl and self.options.shared:
             # static OpenSSL cannot be properly detected because libevent picks up system ssl first
             # so enforce shared openssl
@@ -47,12 +46,13 @@ class LibeventConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires.add("OpenSSL/latest_1.0.2x@conan/stable")
+            self.requires.add("OpenSSL/1.0.2r@conan/stable")
 
     def source(self):
-        checksum = "965cc5a8bb46ce4199a47e9b2c9e1cae3b137e8356ffdad6d94d3b9069b71dc2"
-        tools.get("{0}/releases/download/release-{1}-stable/libevent-{1}-stable.tar.gz".format(self.homepage, self.version), sha256=checksum)
-        os.rename("libevent-{0}-stable".format(self.version), self._source_subfolder)
+        checksum = "316ddb401745ac5d222d7c529ef1eada12f58f6376a66c1118eee803cb70f83d"
+        tools.get("{0}/archive/release-{1}-stable.tar.gz".format(self.homepage, self.version), sha256=checksum)
+        extracted_folder = "libevent-release-{}-stable".format(self.version)
+        os.rename(extracted_folder, self._source_subfolder)
 
     def imports(self):
         # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
@@ -66,73 +66,31 @@ class LibeventConan(ConanFile):
         if self.settings.os == "Macos":
             self.copy("*.dylib*", dst=self._source_subfolder, keep_path=False)
 
+    def _configure_cmake(self):
+        cmake = CMake(self)
+        cmake.definitions["EVENT__BUILD_SHARED_LIBRARIES"] = self.options.shared
+        cmake.definitions["EVENT__DISABLE_DEBUG_MODE"] = self.settings.build_type == "Release"
+        cmake.definitions["EVENT__DISABLE_OPENSSL"] = self.options.with_openssl
+        cmake.definitions["EVENT__DISABLE_BENCHMARK"] = True
+        cmake.definitions["EVENT__DISABLE_TESTS"] = True
+        cmake.definitions["EVENT__DISABLE_REGRESS"] = True
+        cmake.definitions["EVENT__DISABLE_SAMPLES"] = True
+        cmake.configure()
+        return cmake
+
     def build(self):
-        shutil.copy("print-winsock-errors.c", os.path.join(self._source_subfolder, "test"))
-        if self.settings.os == "Linux" or self.settings.os == "Macos":
-
-            autotools = AutoToolsBuildEnvironment(self)
-            env_vars = autotools.vars.copy()
-
-            # required to correctly find static libssl on Linux
-            if self.options.with_openssl and self.settings.os == "Linux":
-                env_vars['OPENSSL_LIBADD'] = '-ldl'
-
-            # disable rpath build
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
-
-            # compose configure options
-            configure_args = []
-            if not self.options.shared:
-                configure_args.append("--disable-shared")
-            configure_args.append("--enable-openssl" if self.options.with_openssl else "--disable-openssl")
-            if self.options.disable_threads:
-                configure_args.append("--disable-thread-support")
-
-            with tools.environment_append(env_vars):
-
-                with tools.chdir(self._source_subfolder):
-                    # set LD_LIBRARY_PATH
-                    with tools.environment_append(RunEnvironment(self).vars):
-                        autotools.configure(args=configure_args)
-                        autotools.make()
-
-        elif self.settings.os == "Windows":
-            vcvars = tools.vcvars_command(self.settings)
-            suffix = ''
-            if self.options.with_openssl:
-                suffix = "OPENSSL_DIR=" + self.deps_cpp_info['OpenSSL'].rootpath
-            # add runtime directives to runtime-unaware nmakefile
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.nmake"),
-                                  'LIBFLAGS=/nologo',
-                                  'LIBFLAGS=/nologo\n'
-                                  'CFLAGS=$(CFLAGS) /%s' % str(self.settings.compiler.runtime))
-            # do not build tests. static_libs is the only target, no shared libs at all
-            make_command = "nmake %s -f Makefile.nmake static_libs" % suffix
-            with tools.chdir(self._source_subfolder):
-                self.run("%s && %s" % (vcvars, make_command))
-
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
-        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        if self.settings.os == "Windows":
-            self.copy("event-config.h", src=os.path.join(self._source_subfolder, "WIN32-Code", "nmake", "event2"), dst="include/event2")
-            self.copy("tree.h", src=os.path.join(self._source_subfolder, "WIN32-Code"), dst="include")
-            self.copy(pattern="*.lib", dst="lib", keep_path=False)
-        for header in ['evdns', 'event', 'evhttp', 'evrpc', 'evutil']:
-            self.copy(header+'.h', dst="include", src=self._source_subfolder)
-        if self.options.shared:
-            if self.settings.os == "Macos":
-                self.copy(pattern="*.dylib", dst="lib", keep_path=False)
-            else:
-                self.copy(pattern="*.so*", dst="lib", keep_path=False)
-        else:
-            self.copy(pattern="*.a", dst="lib", keep_path=False)
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["rt"])
+            self.cpp_info.libs.extend(["m", "pthread"])
 
         if self.settings.os == "Windows":
             self.cpp_info.libs.append('ws2_32')
