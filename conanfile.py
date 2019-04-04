@@ -4,6 +4,7 @@
 import os
 import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, RunEnvironment, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class LibeventConan(ConanFile):
@@ -28,23 +29,21 @@ class LibeventConan(ConanFile):
                        "with_openssl": True,
                        "disable_threads": False}
 
-    @property
-    def _is_shared(self):
-        return self.settings.os != "Windows" and self.options.shared
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.shared
 
     def configure(self):
-        del self.settings.compiler.libcxx
+        if self.settings.os == "Windows" and \
+           self.options.shared:
+            raise ConanInvalidConfiguration("libevent does not support shared on Windows")
 
-        if self.options.with_openssl and self._is_shared:
+        del self.settings.compiler.libcxx
+        if self.options.with_openssl and self.options.shared:
             # static OpenSSL cannot be properly detected because libevent picks up system ssl first
             # so enforce shared openssl
             self.output.warn("Enforce shared OpenSSL for shared build")
-            self.options["OpenSSL"].shared = self._is_shared
+            self.options["OpenSSL"].shared = self.options.shared
 
     def requirements(self):
         if self.options.with_openssl:
@@ -54,7 +53,6 @@ class LibeventConan(ConanFile):
         checksum = "965cc5a8bb46ce4199a47e9b2c9e1cae3b137e8356ffdad6d94d3b9069b71dc2"
         tools.get("{0}/releases/download/release-{1}-stable/libevent-{1}-stable.tar.gz".format(self.homepage, self.version), sha256=checksum)
         os.rename("libevent-{0}-stable".format(self.version), self._source_subfolder)
-        shutil.copy("print-winsock-errors.c", os.path.join(self._source_subfolder, "test"))
 
     def imports(self):
         # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
@@ -69,7 +67,7 @@ class LibeventConan(ConanFile):
             self.copy("*.dylib*", dst=self._source_subfolder, keep_path=False)
 
     def build(self):
-
+        shutil.copy("print-winsock-errors.c", os.path.join(self._source_subfolder, "test"))
         if self.settings.os == "Linux" or self.settings.os == "Macos":
 
             autotools = AutoToolsBuildEnvironment(self)
@@ -84,7 +82,7 @@ class LibeventConan(ConanFile):
 
             # compose configure options
             configure_args = []
-            if not self._is_shared:
+            if not self.options.shared:
                 configure_args.append("--disable-shared")
             configure_args.append("--enable-openssl" if self.options.with_openssl else "--disable-openssl")
             if self.options.disable_threads:
@@ -123,7 +121,7 @@ class LibeventConan(ConanFile):
             self.copy(pattern="*.lib", dst="lib", keep_path=False)
         for header in ['evdns', 'event', 'evhttp', 'evrpc', 'evutil']:
             self.copy(header+'.h', dst="include", src=self._source_subfolder)
-        if self._is_shared:
+        if self.options.shared:
             if self.settings.os == "Macos":
                 self.copy(pattern="*.dylib", dst="lib", keep_path=False)
             else:
