@@ -49,9 +49,9 @@ class LibeventConan(ConanFile):
             self.requires.add("OpenSSL/1.0.2r@conan/stable")
 
     def source(self):
-        checksum = "316ddb401745ac5d222d7c529ef1eada12f58f6376a66c1118eee803cb70f83d"
-        tools.get("{0}/archive/release-{1}-stable.tar.gz".format(self.homepage, self.version), sha256=checksum)
-        extracted_folder = "libevent-release-{}-stable".format(self.version)
+        checksum = "965cc5a8bb46ce4199a47e9b2c9e1cae3b137e8356ffdad6d94d3b9069b71dc2"
+        tools.get("{0}/releases/download/release-{1}-stable/libevent-{1}-stable.tar.gz".format(self.homepage, self.version), sha256=checksum)
+        extracted_folder = "libevent-{0}-stable".format(self.version)
         os.rename(extracted_folder, self._source_subfolder)
 
     def imports(self):
