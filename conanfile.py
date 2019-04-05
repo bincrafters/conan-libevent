@@ -18,7 +18,6 @@ class LibeventConan(ConanFile):
     license = "BSD-3-Clause"
     exports = ["LICENSE.md"]
     exports_sources = ["print-winsock-errors.c"]
-    _source_subfolder = "source_subfolder"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
                "fPIC": [True, False],
@@ -28,17 +27,17 @@ class LibeventConan(ConanFile):
                        "fPIC": True,
                        "with_openssl": True,
                        "disable_threads": False}
+    _source_subfolder = "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        del self.settings.compiler.libcxx
         if self.settings.os == "Windows" and \
            self.options.shared:
             raise ConanInvalidConfiguration("libevent does not support shared on Windows")
-
-        del self.settings.compiler.libcxx
         if self.options.with_openssl and self.options.shared:
             # static OpenSSL cannot be properly detected because libevent picks up system ssl first
             # so enforce shared openssl
@@ -47,12 +46,13 @@ class LibeventConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires.add("OpenSSL/latest_1.0.2x@conan/stable")
+            self.requires.add("OpenSSL/1.0.2r@conan/stable")
 
     def source(self):
-        checksum = "965cc5a8bb46ce4199a47e9b2c9e1cae3b137e8356ffdad6d94d3b9069b71dc2"
-        tools.get("{0}/releases/download/release-{1}-stable/libevent-{1}-stable.tar.gz".format(self.homepage, self.version), sha256=checksum)
-        os.rename("libevent-{0}-stable".format(self.version), self._source_subfolder)
+        checksum = "316ddb401745ac5d222d7c529ef1eada12f58f6376a66c1118eee803cb70f83d"
+        tools.get("{0}/archive/release-{1}-stable.tar.gz".format(self.homepage, self.version), sha256=checksum)
+        extracted_folder = "libevent-release-{}-stable".format(self.version)
+        os.rename(extracted_folder, self._source_subfolder)
 
     def imports(self):
         # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
