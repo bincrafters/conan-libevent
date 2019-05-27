@@ -76,7 +76,7 @@ class LibeventConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["EVENT__LIBRARY_TYPE"] = "SHARED" if self.options.shared else "STATIC"
         cmake.definitions["EVENT__DISABLE_DEBUG_MODE"] = self.settings.build_type == "Release"
-        cmake.definitions["EVENT__DISABLE_OPENSSL"] = self.options.with_openssl
+        cmake.definitions["EVENT__DISABLE_OPENSSL"] = not self.options.with_openssl
         cmake.definitions["EVENT__DISABLE_THREAD_SUPPORT"] = self.options.disable_threads
         cmake.definitions["EVENT__DISABLE_BENCHMARK"] = True
         cmake.definitions["EVENT__DISABLE_TESTS"] = True
