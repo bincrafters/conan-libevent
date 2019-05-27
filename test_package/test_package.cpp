@@ -22,6 +22,7 @@ main(int argc, char **argv)
 	struct event_base *base;
 	struct evconnlistener *listener;
 	struct event *signal_event;
+	const char* version = event_get_version();
 
 	base = event_base_new();
 	if (!base) {
@@ -31,6 +32,7 @@ main(int argc, char **argv)
 
 	event_base_free(base);
 
+	printf("Version %s\n", version);
 	printf("done\n");
 	return 0;
 }

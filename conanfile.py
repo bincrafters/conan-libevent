@@ -60,6 +60,11 @@ class LibeventConan(ConanFile):
         shutil.copy("CMakeLists.txt",
                     os.path.join(self._source_subfolder, "CMakeLists.txt"))
 
+        # patch 'beta' to 'stable' because there is no git repository which cmake uses to determine stage name
+        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "VersionViaGit.cmake"),
+                              'set(EVENT_GIT___VERSION_STAGE "beta")',
+                              'set(EVENT_GIT___VERSION_STAGE "stable")')
+
     def imports(self):
         # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
         #
