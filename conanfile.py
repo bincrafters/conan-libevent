@@ -36,9 +36,6 @@ class LibeventConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
-        if self.settings.os == "Windows" and \
-           self.options.shared:
-            raise ConanInvalidConfiguration("libevent does not support shared on Windows")
         if self.options.with_openssl and self.options.shared:
             # static OpenSSL cannot be properly detected because libevent picks up system ssl first
             # so enforce shared openssl
