@@ -17,6 +17,7 @@ class LibeventConan(ConanFile):
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSD-3-Clause"
     exports = ["LICENSE.md"]
+    exports_sources = ["CMakeLists.txt"]
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
                "fPIC": [True, False],
