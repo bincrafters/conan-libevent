@@ -84,7 +84,8 @@ class LibeventConan(ConanFile):
         cmake.definitions["EVENT__DISABLE_REGRESS"] = True
         cmake.definitions["EVENT__DISABLE_SAMPLES"] = True
         # libevent uses static runtime (MT) for static builds by default
-        cmake.definitions["EVENT__MSVC_STATIC_RUNTIME"] = settings["compiler"] == "Visual Studio" and settings["compiler.runtime"] == "MT"
+        cmake.definitions["EVENT__MSVC_STATIC_RUNTIME"] = self.settings.compiler == "Visual Studio" and \
+                self.settings.compiler.runtime == "MT"
         cmake.configure(source_folder=self._source_subfolder)
         return cmake
 
