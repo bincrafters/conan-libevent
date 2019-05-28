@@ -2,12 +2,19 @@ build: false
 
 environment:
     PYTHON_HOME: "C:\\Python37"
+    CONAN_TOTAL_PAGES: 2
 
     matrix:
         - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
           CONAN_VISUAL_VERSIONS: 12
           CONAN_BUILD_TYPES: Release
           CONAN_ARCHS: x86
+          CONAN_CURRENT_PAGE: 1
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+          CONAN_VISUAL_VERSIONS: 12
+          CONAN_BUILD_TYPES: Release
+          CONAN_ARCHS: x86
+          CONAN_CURRENT_PAGE: 2
         - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
           CONAN_VISUAL_VERSIONS: 12
           CONAN_BUILD_TYPES: Debug
@@ -16,6 +23,12 @@ environment:
           CONAN_VISUAL_VERSIONS: 12
           CONAN_BUILD_TYPES: Release
           CONAN_ARCHS: x86_64
+          CONAN_CURRENT_PAGE: 1
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+          CONAN_VISUAL_VERSIONS: 12
+          CONAN_BUILD_TYPES: Release
+          CONAN_ARCHS: x86_64
+          CONAN_CURRENT_PAGE: 2
         - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
           CONAN_VISUAL_VERSIONS: 12
           CONAN_BUILD_TYPES: Debug
@@ -24,6 +37,12 @@ environment:
           CONAN_VISUAL_VERSIONS: 14
           CONAN_BUILD_TYPES: Release
           CONAN_ARCHS: x86
+          CONAN_CURRENT_PAGE: 1
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+          CONAN_VISUAL_VERSIONS: 14
+          CONAN_BUILD_TYPES: Release
+          CONAN_ARCHS: x86
+          CONAN_CURRENT_PAGE: 2
         - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
           CONAN_VISUAL_VERSIONS: 14
           CONAN_BUILD_TYPES: Debug
@@ -32,6 +51,12 @@ environment:
           CONAN_VISUAL_VERSIONS: 14
           CONAN_BUILD_TYPES: Release
           CONAN_ARCHS: x86_64
+          CONAN_CURRENT_PAGE: 1
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+          CONAN_VISUAL_VERSIONS: 14
+          CONAN_BUILD_TYPES: Release
+          CONAN_ARCHS: x86_64
+          CONAN_CURRENT_PAGE: 2
         - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
           CONAN_VISUAL_VERSIONS: 14
           CONAN_BUILD_TYPES: Debug
@@ -40,6 +65,12 @@ environment:
           CONAN_VISUAL_VERSIONS: 15
           CONAN_BUILD_TYPES: Release
           CONAN_ARCHS: x86
+          CONAN_CURRENT_PAGE: 1
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+          CONAN_VISUAL_VERSIONS: 15
+          CONAN_BUILD_TYPES: Release
+          CONAN_ARCHS: x86
+          CONAN_CURRENT_PAGE: 2
         - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
           CONAN_VISUAL_VERSIONS: 15
           CONAN_BUILD_TYPES: Debug
@@ -48,6 +79,12 @@ environment:
           CONAN_VISUAL_VERSIONS: 15
           CONAN_BUILD_TYPES: Release
           CONAN_ARCHS: x86_64
+          CONAN_CURRENT_PAGE: 1
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+          CONAN_VISUAL_VERSIONS: 15
+          CONAN_BUILD_TYPES: Release
+          CONAN_ARCHS: x86_64
+          CONAN_CURRENT_PAGE: 2
         - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
           CONAN_VISUAL_VERSIONS: 15
           CONAN_BUILD_TYPES: Debug
@@ -56,6 +93,12 @@ environment:
           CONAN_VISUAL_VERSIONS: 16
           CONAN_BUILD_TYPES: Release
           CONAN_ARCHS: x86
+          CONAN_CURRENT_PAGE: 1
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+          CONAN_VISUAL_VERSIONS: 16
+          CONAN_BUILD_TYPES: Release
+          CONAN_ARCHS: x86
+          CONAN_CURRENT_PAGE: 2
         - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
           CONAN_VISUAL_VERSIONS: 16
           CONAN_BUILD_TYPES: Debug
@@ -64,6 +107,12 @@ environment:
           CONAN_VISUAL_VERSIONS: 16
           CONAN_BUILD_TYPES: Release
           CONAN_ARCHS: x86_64
+          CONAN_CURRENT_PAGE: 1
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+          CONAN_VISUAL_VERSIONS: 16
+          CONAN_BUILD_TYPES: Release
+          CONAN_ARCHS: x86_64
+          CONAN_CURRENT_PAGE: 2
         - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
           CONAN_VISUAL_VERSIONS: 16
           CONAN_BUILD_TYPES: Debug
