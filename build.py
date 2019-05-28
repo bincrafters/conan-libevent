@@ -7,9 +7,7 @@ import copy
 if __name__ == "__main__":
     builder = build_template_default.get_builder(pure_c=True)
     for settings, options, env_vars, build_requires, reference in reversed(builder.items):
-        if settings["build_type"] == "Release" and \
-                (settings["compiler"] != "Visual Studio" or settings["compiler.runtime"] == "MD"):
-            # build without OpenSSL for specific builds because Windows builds are very time-limited
+        if settings["build_type"] == "Release":
             new_options = copy.copy(options)
             new_options["libevent:with_openssl"] = False
             builder.add(settings, new_options, env_vars, build_requires)
