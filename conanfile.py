@@ -43,7 +43,7 @@ class LibeventConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires.add("OpenSSL/1.0.2r@conan/stable")
+            self.requires.add("OpenSSL/1.0.2s@conan/stable")
 
     def source(self):
         checksum = "e864af41a336bb11dab1a23f32993afe963c1f69618bd9292b89ecf6904845b0"
