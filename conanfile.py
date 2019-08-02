@@ -43,7 +43,7 @@ class LibeventConan(ConanFile):
             self.requires.add("OpenSSL/1.1.1c@conan/stable")
 
     def source(self):
-        checksum = "e864af41a336bb11dab1a23f32993afe963c1f69618bd9292b89ecf6904845b0"
+        checksum = "a65bac6202ea8c5609fd5c7e480e6d25de467ea1917c08290c521752f147283d"
         tools.get("{0}/releases/download/release-{1}-stable/libevent-{1}-stable.tar.gz".format(self.homepage, self.version), sha256=checksum)
         extracted_folder = "libevent-{0}-stable".format(self.version)
         os.rename(extracted_folder, self._source_subfolder)
@@ -54,9 +54,11 @@ class LibeventConan(ConanFile):
                     os.path.join(self._source_subfolder, "CMakeLists.txt"))
 
         # patch 'beta' to 'stable' because there is no git repository which cmake uses to determine stage name
+        # needed for 2.1.10, not needed for 2.1.11 so marked as non-strict
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "VersionViaGit.cmake"),
                               'set(EVENT_GIT___VERSION_STAGE "beta")',
-                              'set(EVENT_GIT___VERSION_STAGE "stable")')
+                              'set(EVENT_GIT___VERSION_STAGE "stable")',
+                              strict=False)
 
     def imports(self):
         # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
