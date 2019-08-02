@@ -5,7 +5,7 @@ from conans import ConanFile, CMake, tools
 
 class LibeventConan(ConanFile):
     name = "libevent"
-    version = "2.1.10"
+    version = "2.1.11"
     description = "libevent - an event notification library"
     topics = ("conan", "libevent", "event")
     url = "https://github.com/bincrafters/conan-libevent"
