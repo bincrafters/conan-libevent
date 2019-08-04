@@ -43,9 +43,15 @@ class LibeventConan(ConanFile):
             self.requires.add("OpenSSL/1.1.1c@conan/stable")
 
     def source(self):
-        checksum = "a65bac6202ea8c5609fd5c7e480e6d25de467ea1917c08290c521752f147283d"
-        tools.get("{0}/releases/download/release-{1}-stable/libevent-{1}-stable.tar.gz".format(self.homepage, self.version), sha256=checksum)
-        extracted_folder = "libevent-{0}-stable".format(self.version)
+        if self.version == '2.1.11':
+            # temporary fix due to missing files in dist package for 2.1.11, see upstream bug 863
+            checksum = "229393ab2bf0dc94694f21836846b424f3532585bac3468738b7bf752c03901e"
+            tools.get("{0}/archive/release-{1}-stable.tar.gz".format(self.homepage, self.version), sha256=checksum)
+            extracted_folder = "libevent-release-{0}-stable".format(self.version)
+        else:
+            checksum = "a65bac6202ea8c5609fd5c7e480e6d25de467ea1917c08290c521752f147283d"
+            tools.get("{0}/releases/download/release-{1}-stable/libevent-{1}-stable.tar.gz".format(self.homepage, self.version), sha256=checksum)
+            extracted_folder = "libevent-{0}-stable".format(self.version)
         os.rename(extracted_folder, self._source_subfolder)
 
         os.rename(os.path.join(self._source_subfolder, "CMakeLists.txt"),
